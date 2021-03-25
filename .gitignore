@@ -1,0 +1,12 @@
+# Don'track content from these folders
+Docs/
+Input_data/
+Output_data/
+src/.ipynb_checkpoints/
+
+# files
+*.pdf
+*.png
+*.s4
+*.ismr
+*.csv

@@ -1,0 +1,20 @@
+{
+    "editor.fontSize": 15,
+    "editor.minimap.enabled": false,
+    "editor.tabSize": 4,
+    "files.autoSave": "onFocusChange",
+    "python.pythonPath": "/home/luis/anaconda3/envs/tutorial_pandas/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.lintOnSave": true,
+    "python.testing.unittestEnabled": true,
+    "python.testing.pytestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "code-runner.clearPreviousOutput": true,
+    "code-runner.saveFileBeforeRun": true,
+    "code-runner.showExecutionMessage": false,
+    "code-runner.executorMap": {
+      "python": "python3 -u",
+    },
+    "workbench.panel.defaultLocation": "bottom",
+  }
