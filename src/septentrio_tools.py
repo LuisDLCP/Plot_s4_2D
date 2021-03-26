@@ -176,7 +176,7 @@ class PlotsISMR():
         else:
             return False
 
-    def _get_output_figure_name(self):
+    def get_output_figure_name(self):
         station = self.file_name[:4]
         doy = self.file_name[4:7]
         yy = self.file_name[-8:-6]
@@ -287,46 +287,26 @@ class PlotsISMR():
         if freq == 'CN0_sig1': return freq
         elif freq == 'CN0_sig3': return 'CN0_sig2'
     
-    # Append SBAS prns into another prns list 
-    def _append_sbas_prns(self, const, freq, PRNs):
-        const_sbas = 'S'
-        if const == 'G':
-            while freq != 'CN0_sig2':
-                freq_sbas = self._convert_GPS2SBAS_frequency(freq)
-                PRNs_SBAS = self.extract_prns(const_sbas, freq_sbas)
-                PRNs += PRNs_SBAS
-                break
-            return PRNs
-        elif const == 'E':
-            while freq != 'CN0_sig3':
-                freq_sbas = freq
-                PRNs_SBAS = self.extract_prns(const_sbas, freq_sbas)
-                PRNs += PRNs_SBAS
-                break
-            return PRNs
-        else:
-            return PRNs
+    # Append SBAS prns at the end of the PRN list, only for GPS const 
+    def _append_sbas_prns(self, freq, PRNs):
+        while freq != 'CN0_sig2':
+            freq_sbas = self._convert_GPS2SBAS_frequency(freq)
+            PRNs_SBAS = self.extract_prns(const='S', freq=freq_sbas)
+            PRNs += PRNs_SBAS
+            break
+        return PRNs
 
-   # Change frequency for SBAS const
-    def _change_frequency(self, const='G', freq='CN0_sig1'):
-        if const == 'G':
-            return self._convert_GPS2SBAS_frequency(freq)
-        elif const == 'E':
-            return freq
-        else:
-            return freq
- 
     # PLOT VARIABLES: CN0, S4
     # --------------
     # Plot CN0 vs time, and elevation vs time (PLOT TYPE I)
-    def plotCN0(self, pdf, const='G', freq='CN0_sig1', sbas=False):
+    def plotCN0(self, pdf, const='G', freq='CN0_sig1'):
         """
         Input:
         - pdf: object to save into a pdf file  
         """
         if self._check_noNull_values(const, freq): 
             # Get file UTC date
-            figure_name = self._get_output_figure_name() # e.g. ljic_200926
+            figure_name = self.get_output_figure_name() # e.g. ljic_200926
             fecha = figure_name[5:] # e.g. 200926
             fecha2 = datetime.datetime.strptime(fecha, "%y%m%d")
             fecha3 = datetime.datetime.strftime(fecha2,"%Y/%m/%d")
@@ -344,8 +324,8 @@ class PlotsISMR():
             # Get the PRNs
             PRNs = self.extract_prns(const, freq)
 
-            # Include SBAS data if corresponds
-            if sbas: PRNs = self._append_sbas_prns(const, freq, PRNs)
+            # Append SBAS PRNs for GPS const
+            if const=='G': PRNs = self._append_sbas_prns(freq, PRNs)
             
             # Define the A4 page dimentions (landscape)
             fig_width_cm = 29.7      
@@ -390,29 +370,21 @@ class PlotsISMR():
                             # Plot s4 info
                             prn_value = PRNs_section[j]
                             
-                            # -> Get the correct freq if sbas==True
-                            if sbas and prn_value[0]=='S': 
-                               freq_n = self._change_frequency(const, freq)
+                            # -> Get the correct freq for SBAS const, appended to GPS plots
+                            if const=='G' and prn_value[0]=='S': 
+                                freq_n = self._convert_GPS2SBAS_frequency(freq)
                             else: freq_n = freq
-
-                            #df2_cn = self.get_variable(prn_value, var=freq_n)
                             
                             color1 = "blue" # This color is used in y axis labels, ticks and border  
-                            colors1 = ["cornflowerblue", "navy"] #["lightsteelblue", "cornflowerblue", "navy"] # These colors are used for the plots
+                            colors1 = ["cornflowerblue", "navy"] # These colors are used for the plot lines
 
                             for k in range(2):
-                                #df3_cn0 = df2_cn[k+1]
                                 df3_cn0 = self.get_variable(prn_value, var=freq_n+f"_{k+1}")
                                 ax.plot(df3_cn0.index, df3_cn0.values, '.', color=colors1[k], markersize=2)
                                 # Plot the strip day/night
                                 ax.set_facecolor(color="lightgrey")
                                 ax.axvspan(fecha_morning_first, fecha_morning_last, color="white") # strip morning/night
                             
-                            # ax.plot(df2_cn.index, df2_cn.values, '.', color=color1, markersize=2)
-                            # # Plot the strip day/night
-                            # ax.set_facecolor(color="lightgrey")
-                            # ax.axvspan(fecha_morning_first, fecha_morning_last, color="white") # strip morning/night
-
                             # Plot elevation info
                             df2_elev = self.get_variable(prn_value, var="Elev")
                             color2 = "orange"
@@ -545,7 +517,7 @@ class PlotsISMR():
                 n_plots_left -= j
             
             print(f"Plotted successfully; for const: {const}, and freq: {freq}!")
-            return fig
         else:
             print(f"There is only Null data; for const: {const}, and freq: {freq}!") 
-            return 0
+        
+        return 'Ok!'
