@@ -17,8 +17,8 @@ import glob
 import os 
 
 # Declare input and output paths 
-root_path = "/home/luis/Desktop/Proyects_Files/LISN/GPSs/Tareas/Graficas_desvanecimientos/"
-input_files_path = root_path + "Input_data/Data_set/"
+root_path = "/home/luis/Desktop/Proyects_Files/LISN/GPSs/Tareas/Plot_s4_2D/"
+input_files_path = root_path + "Input_data/Data_set2/"
 input_files_path_op = root_path + "Input_data/Data_procesada/"
 output_files_path = root_path + "Output_data/"
 file_name = "ljic2810.20_.ismr" # Test file 
