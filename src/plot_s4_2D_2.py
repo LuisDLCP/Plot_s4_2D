@@ -11,10 +11,6 @@ file_name = "ljic2810.20_.ismr" # Test file
 
 # Get s4 dataframe (test)
 print("Starting ...")
-# file1 = st.ProcessISMR()
-# file1.read_file(archivo)
-# df1 = file1.get_s4()
-# print(df1.head())
 
 # Merge s4 dataframes from many days 
 list_files = glob.glob(input_files_path + "*.ismr")
@@ -35,10 +31,7 @@ if len(list_files) > 0:
 
 print(df2.head())
 
-# Plot 
-pdf = PdfPages("s4_2D_test.pdf")
+pdf = PdfPages("s4_2D_test3_filtered.pdf")
 m = st.PlotsISMR(dataframe=df2, ismr_file_name=file_name)
-fecha = m._get_mode_dates()
-print(fecha)
 m.plotS4_2D(pdf=pdf, const='G', freq='S4_sig2')
 pdf.close()

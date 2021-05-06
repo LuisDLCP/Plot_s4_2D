@@ -152,8 +152,8 @@ class ProcessISMR():
 
         return 'Ok'    
 
-    # Get s4 dataframe for a day
-    def get_s4(self):
+    # Get s4 dataframe for a day, whitout filtering data 
+    def get_s4_old(self):
         """
         Return an s4 dataframe 
         """
@@ -196,6 +196,57 @@ class ProcessISMR():
             # delete
             del self.df[f"S4_sig{i+1}_corr"]
         
+        return self.df
+
+    # Get s4 dataframe for a day, with filtering data 
+    def get_s4(self):
+        """
+        Return an s4 dataframe 
+        """
+        # Read and normalize 
+        self.normalize_df()
+        # Rename the Elev column
+        columnas = ["Elev", "S4_sig1", "S4_sig1_corr", "S4_sig2", "S4_sig2_corr", "S4_sig3", "S4_sig3_corr"]
+        self.rename_column(5, columnas[0])
+        # Rename the s4 columns
+        self.rename_column(7, columnas[1])
+        self.rename_column(8, columnas[2])
+        self.rename_column(32, columnas[3])
+        self.rename_column(33, columnas[4])
+        self.rename_column(46, columnas[5])
+        self.rename_column(47, columnas[6])
+        # Extract certain columns 
+        self.extract_columns(cols=columnas)
+        # Convert to float 
+        self.convert2float(cols=columnas)
+        
+        # Calculate the corrected S4
+        def get_correctedS4(row):
+            s4 = row[0]
+            correction= row[1]
+
+            # Treat nan numbers 
+            if pd.isnull(s4) or pd.isnull(correction):
+                return np.nan
+            else:
+                # Calculate the corrected S4
+                x = s4**2-correction**2
+                if x>0:
+                    return x**0.5
+                else:
+                    return 0    
+
+        for i in range(3):        
+            # calculate
+            self.df[f"S4_sig{i+1}"] = self.df[[f"S4_sig{i+1}",f"S4_sig{i+1}_corr"]].apply(get_correctedS4, axis=1)
+            # delete
+            del self.df[f"S4_sig{i+1}_corr"]
+            # filter data based on elevation angle 
+            self.filter_dataframe(col=f"S4_sig{i+1}", on="Elev", threshold=35, new_col_name=["aux",f"S4_sig{i+1}_new"])
+            del self.df["aux"]
+            del self.df[f"S4_sig{i+1}"]
+            self.rename_column(f"S4_sig{i+1}_new", f"S4_sig{i+1}")
+            
         return self.df
 
     # Plot a column, for each PRN  
@@ -364,56 +415,43 @@ class PlotsISMR():
             break
         return PRNs
 
-    # Create a s4 2D array to plot in 2 dimensions 
+    # Create a s4 2D array to plot in 2 dimensions. Testing  
     def _create2D_array(self, s): # pandas serie
         """
         INPUT: pandas series with date index and s4 values 
         """
         # Complete boundaries values for index variable (datetime)
-        # -> Lower value of range
+        # -> Lower value 
         val1 = self.minDate #s.index[0]
+        #print(val1)
         val1_comp = datetime.datetime(val1.year, val1.month, val1.day, 0, 0)
-        if val1 != val1_comp:
+        
+        val_start = s.index[0]
+        if val1_comp != val_start:
             s_aux1 = pd.concat([pd.Series([np.nan]), s])
             s_aux1 = s_aux1.rename({0:val1_comp})
         else:
             s_aux1 = s
-
-        # -> Upper value of range
+            
+        # -> Upper value
         val2 = self.maxDate #s.index[-1]
-        #print(self.maxDate)
+        #print(val2)
         val2_comp1 = datetime.datetime(val2.year, val2.month, val2.day, 23, 59) + datetime.timedelta(minutes=1)
         val2_comp2 = datetime.datetime(val2.year, val2.month, val2.day, 0, 0)
-        # Choose the final value of val2 
+        # ----> Choose the final value of val2 
         if val2 == val2_comp2:
             val2_f = val2
         else:
             val2_f = val2_comp1
 
+        # ----> Assign upper value 
         val_last = s_aux1.index[-1]
-        val_last_comp = datetime.datetime(val_last.year, val_last.month, val_last.day, 0, 0)
-        # Insert upper value into the pandas series 
-        if val_last ==  val_last_comp:
-            s_aux2 = s_aux1 
-        else:
+        if val2_f != val_last:
             s_aux2 = pd.concat([s_aux1, pd.Series([np.nan])])
             s_aux2 = s_aux2.rename({0:val2_f})
+        else:
+            s_aux2 = s_aux1
     
-        # if val2 == val_last:
-        #     s_aux2 = s_aux1
-        #     print("here")
-        # else:
-        #     s_aux2 = pd.concat([s_aux1, pd.Series([np.nan])])
-        #     s_aux2 = s_aux2.rename({0:val2_comp1})
-        # print(s_aux1.index[-1])
-        # print(np.unique(s_aux2.index.date))
-        
-        # if val2 != val2_comp:
-        #     s_aux2 = pd.concat([s_aux1, pd.Series([np.nan])])
-        #     s_aux2 = s_aux2.rename({0:val2_comp})
-        # else:
-        #     s_aux2 = s_aux1
-            
         # Resampling 
         s2 = s_aux2.resample("T").asfreq() # Each minute 
 
@@ -769,8 +807,7 @@ class PlotsISMR():
                             #print(s)
                             s_aux = self._create2D_array(s)
                             s4_array = s_aux["s4_array"]
-                            #print(s4_array)
-
+                            
                             # Plot s4 data
                             im = ax.imshow(s4_array, cmap=cmap, extent=[x_lims[0], x_lims[1], y_lims[0], y_lims[1]], aspect='auto', vmin=0, vmax=0.5)
                             ax.xaxis_date()
@@ -911,7 +948,7 @@ class PlotsISMR():
                         height = 0.78*n_plots2/(n_rows*n_cols)
                         y_legend = (7- n_plots2/n_cols)/8 # 0.1 + (n_rows - n_plots2/n_cols)/(n_rows+2)
                         
-                        fig.subplots_adjust(right=0.8)
+                        fig.subplots_adjust(right=0.83)
                         cbar_ax = fig.add_axes([0.85, y_legend, 0.03, height])
                         #cbar_ax = fig.add_axes([0, 0, 0.8, 0.05])
                         fig.colorbar(im, cax=cbar_ax, orientation="vertical", label='S4 index', extend='both')  
