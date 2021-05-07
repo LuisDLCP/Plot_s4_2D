@@ -152,7 +152,7 @@ class ProcessISMR():
 
         return 'Ok'    
 
-    # Get s4 dataframe for a day, whitout filtering data 
+    # Get s4 dataframe for a day, whithout filtering data 
     def get_s4_old(self):
         """
         Return an s4 dataframe 
@@ -261,7 +261,7 @@ class ProcessISMR():
         return 'Ok'  
 
 class PlotsISMR():
-    def __init__(self, dataframe, ismr_file_name):
+    def __init__(self, dataframe, ismr_file_name="ljic2810.20_.ismr"):
         self.df = dataframe
         self.file_name = ismr_file_name # e.g. ljic219b15.20_.ismr
         self.minDate = datetime.datetime.today()
@@ -809,7 +809,7 @@ class PlotsISMR():
                             s4_array = s_aux["s4_array"]
                             
                             # Plot s4 data
-                            im = ax.imshow(s4_array, cmap=cmap, extent=[x_lims[0], x_lims[1], y_lims[0], y_lims[1]], aspect='auto', vmin=0, vmax=0.5)
+                            im = ax.imshow(s4_array, cmap=cmap, origin='lower', extent=[x_lims[0], x_lims[1], y_lims[0], y_lims[1]], aspect='auto', vmin=0, vmax=0.5)
                             ax.xaxis_date()
                             ax.yaxis_date()
 
@@ -951,7 +951,7 @@ class PlotsISMR():
                         fig.subplots_adjust(right=0.83)
                         cbar_ax = fig.add_axes([0.85, y_legend, 0.03, height])
                         #cbar_ax = fig.add_axes([0, 0, 0.8, 0.05])
-                        fig.colorbar(im, cax=cbar_ax, orientation="vertical", label='S4 index', extend='both')  
+                        fig.colorbar(im, cax=cbar_ax, orientation="vertical", label='S4 Index', extend='both')  
                     
                     else:
                         ax.axis('off')
