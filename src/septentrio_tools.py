@@ -278,6 +278,19 @@ class PlotsISMR():
         else:
             return False
 
+    def get_station_name(self):
+        """
+        Get the station name based on the station code.
+        Add other stations names if neccessary. 
+        """
+        station_code = self.file_name[:4]
+        if station_code == "ljic":
+            return "Jicamarca"
+        elif station_code == "lsba":
+            return "San-Bartolomé"
+        else:
+            return "" 
+
     def get_output_figure_name(self):
         station = self.file_name[:4]
         doy = self.file_name[4:7]
@@ -671,7 +684,7 @@ class PlotsISMR():
                         # -> Title 
                         if j == 0: # Subplot on Upper left  
                             fig.text(0, 1, fecha3, ha='left', va='bottom', fontsize=17, weight='semibold', transform=ax.transAxes)
-                            fig.text(0.5, 1, 'Jicamarca', ha='left', va='bottom', fontsize=17, weight='semibold', transform=ax.transAxes)   
+                            fig.text(0.42, 1, self.get_station_name(), ha='left', va='bottom', fontsize=17, weight='semibold', transform=ax.transAxes)   
                                           
                         if j == 1: # Subplot on Upper right
                             fig.text(0, 1.3, 'Amplitude', ha='center', va='bottom', fontsize=19, weight='semibold', transform=ax.transAxes)
@@ -923,7 +936,7 @@ class PlotsISMR():
                         # -> Title 
                         if j == 0: # Subplot on Upper left  
                             fig.text(0, 1, fecha_year, ha='left', va='bottom', fontsize=17, weight='semibold', transform=ax.transAxes)
-                            fig.text(0.5, 1, 'Jicamarca', ha='left', va='bottom', fontsize=17, weight='semibold', transform=ax.transAxes)   
+                            fig.text(0.42, 1, self.get_station_name(), ha='left', va='bottom', fontsize=17, weight='semibold', transform=ax.transAxes)   
                                           
                         if j == 1: # Subplot on Upper right
                             fig.text(0, 1.3, 'S4', ha='center', va='bottom', fontsize=19, weight='semibold', transform=ax.transAxes)

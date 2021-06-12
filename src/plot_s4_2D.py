@@ -34,7 +34,10 @@ def merge_df():
             #input_file_name = archivo[len(input_files_path):]
             #os.rename(archivo, input_files_path_op + input_file_name)
 
-    return df2 
+    # Extract a file's name 
+    file_random = archivo[len(input_files_path):]
+
+    return {"df": df2, "file_random":file_random} 
 
 def main():
     # Specify the const and freq to plot    
@@ -42,13 +45,17 @@ def main():
     freq_list = ['S4_sig1', 'S4_sig2', 'S4_sig3'] 
 
     # Get merged df 
-    df = merge_df()
+    dfs = merge_df()
+    df = dfs["df"]
+    ismr_file = dfs["file_random"]
 
     # Plot
-    pdf = PdfPages(output_files_path + "s4_months.pdf")
+    m = st.PlotsISMR(dataframe=df, ismr_file_name=ismr_file)
+    plot_name = m.file_name[:4] # e.g. ljic
+    plot_name += "_s4_months.pdf"
+    pdf = PdfPages(output_files_path + plot_name)
     for const in const_list:
         for freq in freq_list:
-            m = st.PlotsISMR(dataframe=df)
             m.plotS4_2D(pdf=pdf, const=const, freq=freq)
     pdf.close()
 
