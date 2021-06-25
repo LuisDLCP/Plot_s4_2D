@@ -822,7 +822,7 @@ class PlotsISMR():
                             s4_array = s_aux["s4_array"]
                             
                             # Plot s4 data
-                            im = ax.imshow(s4_array, cmap=cmap, origin='lower', extent=[x_lims[0], x_lims[1], y_lims[0], y_lims[1]], aspect='auto', vmin=0, vmax=0.5)
+                            im = ax.imshow(s4_array, cmap=cmap, origin='lower', extent=[x_lims[0], x_lims[1], y_lims[0], y_lims[1]], aspect='auto', vmin=0.15, vmax=0.5)
                             ax.xaxis_date()
                             ax.yaxis_date()
 
@@ -837,7 +837,7 @@ class PlotsISMR():
                         else:
                             # Plot an array with nan values 
                             s4_array_nan = np.ones(s4_array.shape)*np.nan
-                            ax.imshow(s4_array_nan, cmap=cmap, extent=[x_lims[0], x_lims[1], y_lims[0], y_lims[1]], aspect='auto', vmin=0, vmax=0.5)
+                            ax.imshow(s4_array_nan, cmap=cmap, extent=[x_lims[0], x_lims[1], y_lims[0], y_lims[1]], aspect='auto', vmin=0.15, vmax=0.5)
                             ax.xaxis_date()
                             ax.yaxis_date()
                             

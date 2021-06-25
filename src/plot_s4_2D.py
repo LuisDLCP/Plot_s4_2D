@@ -41,8 +41,8 @@ def merge_df():
 
 def main():
     # Specify the const and freq to plot    
-    const_list = ['G', 'E']   
-    freq_list = ['S4_sig1', 'S4_sig2', 'S4_sig3'] 
+    const_freq_list = {"G":["S4_sig1", "S4_sig2", "S4_sig3"] , 
+                       "E":["S4_sig1", "S4_sig2"]}
 
     # Get merged df 
     dfs = merge_df()
@@ -54,8 +54,8 @@ def main():
     plot_name = m.file_name[:4] # e.g. ljic
     plot_name += "_s4_months.pdf"
     pdf = PdfPages(output_files_path + plot_name)
-    for const in const_list:
-        for freq in freq_list:
+    for const, freqs in const_freq_list.items():
+        for freq in freqs:
             m.plotS4_2D(pdf=pdf, const=const, freq=freq)
     pdf.close()
 
